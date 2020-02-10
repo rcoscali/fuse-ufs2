@@ -41,18 +41,20 @@ int do_modetoufslag (mode_t mode)
 
 static inline int old_valid_dev(dev_t dev)
 {
-	return major(dev) < 256 && minor(dev) < 256;
+	unsigned minor = (dev & 0xff) | ((dev >> 12) & 0xfff00);
+	return ((dev & 0xfff00) >> 8) < 256 && minor < 256;
 }
 
 static inline __u16 old_encode_dev(dev_t dev)
 {
-	return (major(dev) << 8) | minor(dev);
+	unsigned minor = (dev & 0xff) | ((dev >> 12) & 0xfff00);
+	return ((dev & 0xfff00) | minor);
 }
 
 static inline __u32 new_encode_dev(dev_t dev)
 {
-	unsigned major = major(dev);
-	unsigned minor = minor(dev);
+	unsigned major = ((dev & 0xfff00) >> 8);
+	unsigned minor = (dev & 0xff) | ((dev >> 12) & 0xfff00);
 	return (minor & 0xff) | (major << 8) | ((minor & ~0xff) << 12);
 }
 
